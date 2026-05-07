@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import * as api from './api';
 import { 
   LayoutDashboard, 
   Store, 
@@ -84,40 +85,57 @@ const Header = ({ title, subtitle, rightContent }: any) => (
   </header>
 );
 
-// --- Dummy Data ---
-const PRODUCTS = [
-  { id: 1, name: 'Carbonara', price: 20000, category: 'Pasta', spicy: 1, image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800&auto=format&fit=crop' },
-  { id: 2, name: 'Bolognese', price: 15000, category: 'Pasta', spicy: 1, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=800&auto=format&fit=crop' },
-  { id: 3, name: 'Spaghetti Matah', price: 15000, category: 'Fusion', spicy: 4, image: '/spaghetti-matah.png' },
-  { id: 4, name: 'Aglio Olio', price: 15000, category: 'Pasta', spicy: 3, image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop' },
-];
-
-const INITIAL_TRANSACTIONS = [
-  { id: '#LZ-9402', customerName: 'Budi Santoso', items: [{ name: 'Spaghetti Matah', qty: 2 }, { name: 'Aglio Olio', qty: 1 }], total: 45000, time: '14:22', status: 'Served', type: 'Dine-in' },
-  { id: '#LZ-9403', customerName: 'Siti Aminah', items: [{ name: 'Carbonara', qty: 1 }], total: 20000, time: '14:28', status: 'Ready', type: 'Takeaway' },
-  { id: '#LZ-9404', customerName: 'Andi Wijaya', items: [{ name: 'Bolognese', qty: 3 }], total: 45000, time: '14:31', status: 'Cooking', type: 'Dine-in' },
-  { id: '#LZ-9405', customerName: 'Rina Marlina', items: [{ name: 'Carbonara', qty: 2 }, { name: 'Aglio Olio', qty: 1 }], total: 55000, time: '14:45', status: 'Cooking', type: 'Delivery' },
-];
+// --- API Status Banner ---
+const APIStatusBanner = ({ online }: { online: boolean | null }) => {
+  if (online === null) return null;
+  if (online) return null;
+  return (
+    <div className="fixed bottom-4 right-4 z-50 bg-red-600 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-semibold animate-bounce">
+      <AlertCircle className="w-4 h-4 shrink-0" />
+      Backend offline – pastikan server berjalan di port 3001
+    </div>
+  );
+};
 
 // --- Views ---
 
 const DashboardView = ({ transactions }: any) => {
-  const totalRevenue = useMemo(() => transactions.reduce((sum: number, t: any) => sum + t.total, 0), [transactions]);
-  const orderCount = transactions.length;
-  
-  const topProduct = useMemo(() => {
-    const counts: Record<string, number> = {};
-    transactions.forEach((t: any) => {
-      t.items.forEach((item: any) => {
-        counts[item.name] = (counts[item.name] || 0) + item.qty;
-      });
-    });
-    let top = { name: '-', qty: 0 };
-    for (const [name, qty] of Object.entries(counts)) {
-      if ((qty as number) > top.qty) top = { name, qty: qty as number };
-    }
-    return top.name;
+  const [stats, setStats] = useState<any>(null);
+  const [recent, setRecent] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [s, r] = await Promise.all([api.getDashboardStats(), api.getRecentTransactions()]);
+        setStats(s);
+        setRecent(r);
+      } catch {
+        // fallback ke prop transactions jika API offline
+        setRecent(transactions.slice(0, 6));
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, [transactions]);
+
+  const totalRevenue = stats?.revenue?.today ?? transactions.reduce((s: number, t: any) => s + t.total, 0);
+  const orderCount   = stats?.orders?.today   ?? transactions.length;
+  const activeCount  = stats?.orders?.active  ?? transactions.filter((t: any) => t.status === 'Cooking').length;
+  const topProduct   = stats?.topProduct      ?? '-';
+  const revenueChange = stats?.revenue?.changePercent ?? 0;
+  const channels     = stats?.revenueByChannel ?? { dineIn: { percent: 65 }, takeaway: { percent: 20 }, delivery: { percent: 15 } };
+  const displayRows  = recent.length ? recent : transactions.slice().reverse().slice(0, 6);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <div className="flex flex-col items-center gap-4 text-zinc-400">
+        <div className="w-10 h-10 border-4 border-red-200 border-t-red-500 rounded-full animate-spin" />
+        <p className="text-sm font-semibold">Memuat data dari database...</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-8 flex flex-col gap-8 overflow-y-auto h-full custom-scrollbar bg-zinc-50/50">
@@ -141,21 +159,21 @@ const DashboardView = ({ transactions }: any) => {
           <div className="flex items-end justify-between relative z-10 mt-2">
             <h3 className="text-3xl font-bold text-zinc-800 tracking-tight">{orderCount}</h3>
           </div>
-          <span className="text-zinc-400 text-[10px] font-bold italic mt-1">Avg 12 orders/hr</span>
+          <span className="text-zinc-400 text-[10px] font-bold italic mt-1">Hari ini</span>
         </motion.div>
 
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500 flex flex-col gap-2">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Active Customers</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pesanan Aktif</p>
           <div className="flex items-end justify-between mt-2">
             <h3 className="text-3xl font-bold text-red-600 tracking-tight">
-              {transactions.filter((t: any) => t.status === 'Cooking').length} <span className="text-sm font-normal text-zinc-400">Waiting</span>
+              {activeCount} <span className="text-sm font-normal text-zinc-400">Menunggu</span>
             </h3>
             <Users className="w-6 h-6 text-zinc-300" />
           </div>
         </motion.div>
 
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500 flex flex-col gap-2">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Top Selling Product</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Top Selling</p>
           <div className="flex items-center gap-3 mt-3">
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
               <Star className="w-5 h-5 text-red-600 fill-red-600" />
@@ -185,7 +203,7 @@ const DashboardView = ({ transactions }: any) => {
               </thead>
               <tbody className="divide-y divide-zinc-50 text-sm">
                 <AnimatePresence>
-                  {[...transactions].reverse().slice(0, 6).map((t: any) => (
+                  {displayRows.map((t: any) => (
                     <motion.tr 
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -224,9 +242,9 @@ const DashboardView = ({ transactions }: any) => {
                     </motion.tr>
                   ))}
                 </AnimatePresence>
-                {transactions.length === 0 && (
+                {displayRows.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-zinc-400">No transactions yet. Go to POS to add an order.</td>
+                    <td colSpan={5} className="text-center py-8 text-zinc-400">Belum ada transaksi. Buka POS untuk mulai order.</td>
                   </tr>
                 )}
               </tbody>
@@ -238,9 +256,9 @@ const DashboardView = ({ transactions }: any) => {
           <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Revenue by Channel</h4>
           <div className="flex-1 flex flex-col justify-center gap-6">
             {[
-              { label: 'Dine-in Customers', val: '65%', p: 'w-[65%]', color: 'bg-red-500' },
-              { label: 'Takeaway Orders', val: '20%', p: 'w-[20%]', color: 'bg-orange-400' },
-              { label: 'Online Delivery', val: '15%', p: 'w-[15%]', color: 'bg-blue-400' },
+              { label: 'Dine-in', val: `${channels.dineIn.percent}%`, pct: channels.dineIn.percent, color: 'bg-red-500' },
+              { label: 'Takeaway', val: `${channels.takeaway.percent}%`, pct: channels.takeaway.percent, color: 'bg-orange-400' },
+              { label: 'Delivery', val: `${channels.delivery.percent}%`, pct: channels.delivery.percent, color: 'bg-blue-400' },
             ].map((e, i) => (
               <motion.div 
                 initial={{ opacity: 0, scaleX: 0 }}
@@ -254,7 +272,7 @@ const DashboardView = ({ transactions }: any) => {
                   <span className="text-zinc-800">{e.val}</span>
                 </div>
                 <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
-                  <div className={`${e.color} h-full ${e.p} rounded-full relative overflow-hidden`}>
+                  <div className={`${e.color} h-full rounded-full relative overflow-hidden`} style={{ width: `${e.pct}%` }}>
                     <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]"></div>
                   </div>
                 </div>
@@ -275,14 +293,21 @@ const DashboardView = ({ transactions }: any) => {
 
 const POSView = ({ cart, setCart, onCheckout }: any) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
+  const [products, setProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    api.getProducts()
+      .then(setProducts)
+      .catch(() => setProducts([]))
+      .finally(() => setLoadingProducts(false));
+  }, []);
+
   const addToCart = (product: any) => {
     setCart((prev: any) => {
       const existing = prev.find((item: any) => item.id === product.id);
-      if (existing) {
-        return prev.map((item: any) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
-      }
-      return [...prev, { ...product, quantity: 1 }];
+      if (existing) return prev.map((item: any) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+      return [...prev, { ...product, spicy: product.spicy_level, image: product.image_url, quantity: 1 }];
     });
   };
 
@@ -296,8 +321,7 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
     }).filter((item: any) => item.quantity > 0));
   };
 
-  const filteredProducts = PRODUCTS.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
+  const filtered = products.filter(p => p.is_available && p.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const subtotal = cart.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
@@ -329,44 +353,46 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
 
         <div className="flex-grow overflow-y-auto custom-scrollbar p-8 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AnimatePresence>
-              {filteredProducts.map(item => (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  key={item.id}
-                  whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
-                  className="bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm transition-all flex flex-col"
-                >
-                  <div className="h-40 overflow-hidden relative">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-5">
-                      <span className="text-white text-xl font-bold shadow-sm">{item.name}</span>
+          {loadingProducts ? (
+            <div className="col-span-4 flex justify-center items-center py-20 text-zinc-400">
+              <div className="w-8 h-8 border-4 border-red-200 border-t-red-500 rounded-full animate-spin" />
+            </div>
+          ) : filtered.map(item => (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              key={item.id}
+              whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+              className="bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm transition-all flex flex-col"
+            >
+                <div className="h-40 overflow-hidden relative">
+                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-5">
+                    <span className="text-white text-xl font-bold shadow-sm">{item.name}</span>
+                  </div>
+                </div>
+                <div className="p-5 flex flex-col flex-grow justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <p className="text-red-600 font-bold text-lg">Rp {item.price.toLocaleString()}</p>
+                    </div>
+                    <div className="flex items-center gap-1 mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < (item.spicy_level || 1) ? 'bg-red-500' : 'bg-zinc-200'}`}></div>
+                      ))}
+                      <span className="text-[10px] text-zinc-400 ml-2 uppercase font-bold">Spicy Lvl</span>
                     </div>
                   </div>
-                  <div className="p-5 flex flex-col flex-grow justify-between">
-                    <div>
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-red-600 font-bold text-lg">Rp {item.price.toLocaleString()}</p>
-                      </div>
-                      <div className="flex items-center gap-1 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                           <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < item.spicy ? 'bg-red-500' : 'bg-zinc-200'}`}></div>
-                        ))}
-                        <span className="text-[10px] text-zinc-400 ml-2 uppercase font-bold">Spicy Lvl</span>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => addToCart(item)}
-                      className="w-full bg-gradient-to-b from-red-500 to-red-600 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:from-red-600 hover:to-red-700 shadow-md active:scale-95 transition-all"
-                    >
-                      <Plus className="w-4 h-4" /> Add to Order
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                  <button
+                    onClick={() => addToCart(item)}
+                    className="w-full bg-gradient-to-b from-red-500 to-red-600 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:from-red-600 hover:to-red-700 shadow-md active:scale-95 transition-all"
+                  >
+                    <Plus className="w-4 h-4" /> Add to Order
+                  </button>
+                </div>
+            </motion.div>
+          ))}
           </div>
         </div>
       </div>
@@ -451,27 +477,34 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
   const [customerName, setCustomerName] = useState('');
   const [orderType, setOrderType] = useState('Dine-in');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [submitting, setSubmitting] = useState(false);
 
   const subtotal = cart.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.1;
-  const service = orderType === 'Dine-in' ? subtotal * 0.05 : 0;
+  const tax = Math.round(subtotal * 0.1);
+  const service = orderType === 'Dine-in' ? Math.round(subtotal * 0.05) : 0;
   const total = subtotal + tax + service;
 
-  const handleCheckout = () => {
-    if (!customerName) {
-      alert('Please enter a customer name');
-      return;
+  const handleCheckout = async () => {
+    if (!customerName.trim()) { alert('Masukkan nama pelanggan.'); return; }
+    setSubmitting(true);
+    try {
+      const newTx = await api.createTransaction({
+        customer_name: customerName,
+        order_type: orderType,
+        payment_method: paymentMethod,
+        items: cart.map((c: any) => ({
+          product_id: c.id,
+          product_name: c.name,
+          quantity: c.quantity,
+          unit_price: c.price,
+        })),
+      });
+      onComplete(newTx);
+    } catch (err: any) {
+      alert('Gagal menyimpan: ' + err.message);
+    } finally {
+      setSubmitting(false);
     }
-    const newTransaction = {
-      id: `#LZ-${Math.floor(Math.random() * 10000)}`,
-      customerName,
-      items: cart.map((c: any) => ({ name: c.name, qty: c.quantity })),
-      total,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'Cooking',
-      type: orderType
-    };
-    onComplete(newTransaction);
   };
 
   return (
@@ -586,12 +619,19 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
         <div className="mt-auto">
           <button 
             onClick={handleCheckout}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-2xl flex items-center justify-center gap-4 group relative overflow-hidden shadow-lg shadow-red-600/30 transition-all active:scale-[0.98]"
+            disabled={cart.length === 0 || submitting}
+            className={`w-full text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-4 group relative overflow-hidden shadow-lg shadow-red-600/30 transition-all active:scale-[0.98] ${
+              cart.length > 0 && !submitting ? 'bg-red-600 hover:bg-red-700' : 'bg-zinc-400 cursor-not-allowed'
+            }`}
           >
-            <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <Printer className="w-6 h-6" />
-            <span className="text-xl font-bold uppercase tracking-widest">FINALIZE ORDER</span>
-            <ChevronRight className="w-6 h-6 ml-2 absolute right-8 group-hover:translate-x-2 transition-transform" />
+            {submitting ? (
+              <><div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Menyimpan...</>
+            ) : (
+              <><div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <Printer className="w-6 h-6" />
+              <span className="text-xl font-bold uppercase tracking-widest">FINALIZE ORDER</span>
+              <ChevronRight className="w-6 h-6 ml-2 absolute right-8 group-hover:translate-x-2 transition-transform" /></>
+            )}
           </button>
         </div>
       </section>
@@ -658,26 +698,42 @@ const HistoryView = ({ transactions }: any) => (
 );
 
 const InventoryView = () => {
-  const inventoryItems = [
-    { id: 1, name: 'Spaghetti Pasta (Dry)', stock: 85, unit: 'kg', status: 'Good', limit: 20 },
-    { id: 2, name: 'Garlic', stock: 12, unit: 'kg', status: 'Low', limit: 15 },
-    { id: 3, name: 'Smoked Beef / Bacon', stock: 45, unit: 'packs', status: 'Good', limit: 10 },
-    { id: 4, name: 'Parmesan Cheese', stock: 8, unit: 'kg', status: 'Critical', limit: 10 },
-    { id: 5, name: 'Sambal Matah Ingredients', stock: 30, unit: 'sets', status: 'Good', limit: 10 },
-    { id: 6, name: 'Minced Beef', stock: 50, unit: 'kg', status: 'Good', limit: 20 },
-    { id: 7, name: 'Olive Oil', stock: 15, unit: 'liters', status: 'Low', limit: 20 },
-  ];
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadItems = () => {
+    api.getIngredients()
+      .then(setItems)
+      .catch(() => setItems([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { loadItems(); }, []);
+
+  const handleRestock = async (id: number, name: string) => {
+    const val = window.prompt(`Tambah stok untuk "${name}" (masukkan jumlah):`);
+    if (!val || isNaN(Number(val))) return;
+    try {
+      await api.restockIngredient(id, Number(val));
+      loadItems();
+    } catch (err: any) {
+      alert('Gagal restock: ' + err.message);
+    }
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <div className="w-10 h-10 border-4 border-red-200 border-t-red-500 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className="p-8 flex flex-col gap-8 overflow-y-auto h-full custom-scrollbar bg-zinc-50/50">
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-zinc-800">Ingredient Inventory</h2>
-          <p className="text-sm text-zinc-500 mt-1">Manage stock for your 4 spaghetti flavors</p>
+          <p className="text-sm text-zinc-500 mt-1">Stok bahan baku real-time dari database MySQL</p>
         </div>
-        <button className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Item
-        </button>
       </div>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -687,7 +743,7 @@ const InventoryView = () => {
           </div>
           <div>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total Items</p>
-            <h3 className="text-2xl font-bold text-zinc-800">{inventoryItems.length}</h3>
+            <h3 className="text-2xl font-bold text-zinc-800">{items.length}</h3>
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4">
@@ -696,7 +752,7 @@ const InventoryView = () => {
           </div>
           <div>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Low Stock</p>
-            <h3 className="text-2xl font-bold text-zinc-800">{inventoryItems.filter(i => i.status === 'Low').length}</h3>
+            <h3 className="text-2xl font-bold text-zinc-800">{items.filter(i => i.status === 'Low').length}</h3>
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4">
@@ -705,7 +761,7 @@ const InventoryView = () => {
           </div>
           <div>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Critical</p>
-            <h3 className="text-2xl font-bold text-red-600">{inventoryItems.filter(i => i.status === 'Critical').length}</h3>
+            <h3 className="text-2xl font-bold text-red-600">{items.filter(i => i.status === 'Critical').length}</h3>
           </div>
         </div>
       </section>
@@ -726,33 +782,30 @@ const InventoryView = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50 text-sm">
-              {inventoryItems.map(item => {
-                const percentage = Math.min((item.stock / (item.limit * 5)) * 100, 100);
+              {items.map(item => {
+                const percentage = Math.min((Number(item.stock) / (Number(item.min_stock) * 5)) * 100, 100);
                 return (
                   <tr key={item.id} className="hover:bg-zinc-50 transition-colors">
                     <td className="px-6 py-4 font-bold text-zinc-800">{item.name}</td>
                     <td className="px-6 py-4">
-                      <span className="font-bold">{item.stock}</span> <span className="text-zinc-500 text-xs">{item.unit}</span>
+                      <span className="font-bold">{Number(item.stock).toLocaleString()}</span> <span className="text-zinc-500 text-xs">{item.unit}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${
                         item.status === 'Good' ? 'bg-green-50 text-green-700' :
                         item.status === 'Low' ? 'bg-yellow-50 text-yellow-700' :
                         'bg-red-50 text-red-600'
-                      }`}>
-                        {item.status}
-                      </span>
+                      }`}>{item.status}</span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full ${item.status === 'Good' ? 'bg-green-500' : item.status === 'Low' ? 'bg-yellow-500' : 'bg-red-500'}`}
+                        <div className={`h-full rounded-full ${item.status === 'Good' ? 'bg-green-500' : item.status === 'Low' ? 'bg-yellow-500' : 'bg-red-500'}`}
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                       <button className="text-red-600 font-bold text-xs hover:underline">Restock</button>
+                      <button onClick={() => handleRestock(item.id, item.name)} className="text-red-600 font-bold text-xs hover:underline">Restock</button>
                     </td>
                   </tr>
                 );
@@ -771,10 +824,21 @@ const InventoryView = () => {
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [cart, setCart] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [apiOnline, setApiOnline] = useState<boolean | null>(null);
+
+  // Fetch semua transaksi dari API saat mount
+  useEffect(() => {
+    api.checkHealth()
+      .then(() => setApiOnline(true))
+      .catch(() => setApiOnline(false));
+    api.getTransactions()
+      .then(setTransactions)
+      .catch(() => setTransactions([]));
+  }, []);
 
   const handleCheckoutComplete = (newTransaction: any) => {
-    setTransactions([...transactions, newTransaction]);
+    setTransactions(prev => [...prev, newTransaction]);
     setCart([]);
     setCurrentView('dashboard');
   };
@@ -796,6 +860,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-zinc-50 text-zinc-900 overflow-hidden font-sans">
+      <APIStatusBanner online={apiOnline} />
       {/* Sidebar */}
       <aside className="w-24 md:w-64 bg-zinc-950 border-r border-zinc-900 flex flex-col h-full py-8 gap-2 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-50">
         <div className="px-6 mb-10 flex items-center gap-3">
