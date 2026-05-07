@@ -37,46 +37,49 @@ import { motion, AnimatePresence } from 'motion/react';
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button 
     onClick={onClick}
-    className={`flex items-center gap-4 w-full py-3 px-6 transition-all duration-200 relative group ${
+    className={`flex items-center gap-3 w-full py-3.5 px-6 transition-all duration-300 relative group ${
       active 
-        ? 'bg-red-50 text-red-600 font-semibold' 
-        : 'text-gray-500 hover:bg-gray-50'
+        ? 'bg-zinc-900 text-white font-semibold' 
+        : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200'
     }`}
   >
-    {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-600 rounded-r-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />}
-    <Icon className={`w-5 h-5 ${active ? 'text-red-600' : 'group-hover:text-red-600 transition-colors'}`} />
+    {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)]" />}
+    <Icon className={`w-5 h-5 transition-transform duration-300 ${active ? 'text-red-500 scale-110' : 'group-hover:scale-110'}`} />
     <span className="hidden md:block text-sm tracking-wide">{label}</span>
   </button>
 );
 
 const Header = ({ title, subtitle, rightContent }: any) => (
-  <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 flex justify-between items-center px-8 shadow-sm">
+  <header className="sticky top-0 z-40 bg-white border-b border-zinc-200 h-[72px] flex justify-between items-center px-8 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
     <div className="flex items-center gap-4">
       <div>
-        <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+        <h2 className="text-xl font-extrabold text-zinc-800 tracking-tight">{title}</h2>
         {subtitle && (
-          <div className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 mt-0.5 bg-gray-50 border border-gray-200 rounded-full">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{subtitle}</span>
+          <div className="hidden lg:flex items-center gap-2 mt-0.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">{subtitle}</span>
           </div>
         )}
       </div>
     </div>
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-5">
       {rightContent}
-      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
-         <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-[10px]">AD</div>
-         <span className="text-xs font-semibold text-gray-700">Admin</span>
+      <div className="hidden md:flex relative group">
+         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-red-500 transition-colors" />
+         <input type="text" placeholder="Quick search..." className="pl-9 pr-4 py-2 bg-zinc-100 border-transparent focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-200 rounded-xl text-sm w-56 transition-all outline-none" />
       </div>
-      <div className="relative">
-        <button className="p-2 hover:bg-gray-100 transition-colors rounded-full text-gray-500">
-          <Bell className="w-5 h-5" />
-        </button>
-        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-      </div>
-      <button className="p-2 hover:bg-gray-100 transition-colors rounded-full text-gray-500">
-        <Settings className="w-5 h-5" />
+      <div className="h-6 w-px bg-zinc-200 hidden md:block"></div>
+      <button className="relative p-2 hover:bg-zinc-100 transition-colors rounded-full text-zinc-500">
+        <Bell className="w-5 h-5" />
+        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
       </button>
+      <div className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity">
+         <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-red-500/20 ring-2 ring-white">AD</div>
+         <div className="hidden md:block text-left">
+           <p className="text-sm font-bold text-zinc-800 leading-none">Admin</p>
+           <p className="text-[10px] text-zinc-500 mt-1 font-semibold uppercase tracking-wider">Store Manager</p>
+         </div>
+      </div>
     </div>
   </header>
 );
@@ -85,7 +88,7 @@ const Header = ({ title, subtitle, rightContent }: any) => (
 const PRODUCTS = [
   { id: 1, name: 'Carbonara', price: 20000, category: 'Pasta', spicy: 1, image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800&auto=format&fit=crop' },
   { id: 2, name: 'Bolognese', price: 15000, category: 'Pasta', spicy: 1, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=800&auto=format&fit=crop' },
-  { id: 3, name: 'Spaghetti Matah', price: 15000, category: 'Fusion', spicy: 4, image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&auto=format&fit=crop' },
+  { id: 3, name: 'Spaghetti Matah', price: 15000, category: 'Fusion', spicy: 4, image: '/spaghetti-matah.png' },
   { id: 4, name: 'Aglio Olio', price: 15000, category: 'Pasta', spicy: 3, image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop' },
 ];
 
@@ -117,62 +120,62 @@ const DashboardView = ({ transactions }: any) => {
   }, [transactions]);
 
   return (
-    <div className="p-8 flex flex-col gap-8 overflow-y-auto h-full custom-scrollbar bg-gray-50/50">
+    <div className="p-8 flex flex-col gap-8 overflow-y-auto h-full custom-scrollbar bg-zinc-50/50">
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-2 relative overflow-hidden group hover:border-red-200 transition-colors">
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex flex-col gap-2 relative overflow-hidden group hover:border-red-200 transition-colors">
           <div className="absolute right-0 top-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
           <TrendingUp className="absolute right-4 top-4 w-6 h-6 text-red-200" />
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest relative z-10">Total Revenue</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest relative z-10">Total Revenue</p>
           <div className="flex items-end justify-between relative z-10 mt-2">
-            <h3 className="text-3xl font-bold text-gray-800 tracking-tight">Rp {totalRevenue.toLocaleString()}</h3>
+            <h3 className="text-3xl font-bold text-zinc-800 tracking-tight">Rp {totalRevenue.toLocaleString()}</h3>
           </div>
           <span className="text-green-500 flex items-center text-[10px] font-bold gap-1 mt-1">
             <TrendingUp className="w-3 h-3" /> +15.4% from yesterday
           </span>
         </motion.div>
 
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-2 relative overflow-hidden group hover:border-red-200 transition-colors">
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex flex-col gap-2 relative overflow-hidden group hover:border-red-200 transition-colors">
           <div className="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
           <ShoppingCart className="absolute right-4 top-4 w-6 h-6 text-blue-200" />
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest relative z-10">Total Orders</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest relative z-10">Total Orders</p>
           <div className="flex items-end justify-between relative z-10 mt-2">
-            <h3 className="text-3xl font-bold text-gray-800 tracking-tight">{orderCount}</h3>
+            <h3 className="text-3xl font-bold text-zinc-800 tracking-tight">{orderCount}</h3>
           </div>
-          <span className="text-gray-400 text-[10px] font-bold italic mt-1">Avg 12 orders/hr</span>
+          <span className="text-zinc-400 text-[10px] font-bold italic mt-1">Avg 12 orders/hr</span>
         </motion.div>
 
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500 flex flex-col gap-2">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Customers</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Active Customers</p>
           <div className="flex items-end justify-between mt-2">
             <h3 className="text-3xl font-bold text-red-600 tracking-tight">
-              {transactions.filter((t: any) => t.status === 'Cooking').length} <span className="text-sm font-normal text-gray-400">Waiting</span>
+              {transactions.filter((t: any) => t.status === 'Cooking').length} <span className="text-sm font-normal text-zinc-400">Waiting</span>
             </h3>
-            <Users className="w-6 h-6 text-gray-300" />
+            <Users className="w-6 h-6 text-zinc-300" />
           </div>
         </motion.div>
 
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500 flex flex-col gap-2">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Top Selling Product</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Top Selling Product</p>
           <div className="flex items-center gap-3 mt-3">
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
               <Star className="w-5 h-5 text-red-600 fill-red-600" />
             </div>
-            <h3 className="text-lg font-bold text-gray-800 leading-tight">{topProduct}</h3>
+            <h3 className="text-lg font-bold text-zinc-800 leading-tight">{topProduct}</h3>
           </div>
         </motion.div>
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+            <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
               <History className="w-4 h-4 text-red-500" /> Recent Customer Purchases
             </h4>
           </div>
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <tr className="bg-zinc-50 border-b border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                   <th className="px-6 py-4">Customer</th>
                   <th className="px-6 py-4">Items Bought</th>
                   <th className="px-6 py-4">Total Amount</th>
@@ -180,34 +183,34 @@ const DashboardView = ({ transactions }: any) => {
                   <th className="px-6 py-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 text-sm">
+              <tbody className="divide-y divide-zinc-50 text-sm">
                 <AnimatePresence>
                   {[...transactions].reverse().slice(0, 6).map((t: any) => (
                     <motion.tr 
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       key={t.id} 
-                      className="hover:bg-gray-50 transition-colors group"
+                      className="hover:bg-zinc-50 transition-colors group"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 border border-gray-200">
+                          <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 border border-zinc-200">
                              <UserCircle className="w-5 h-5" />
                           </div>
                           <div>
-                            <p className="font-bold text-gray-800">{t.customerName}</p>
-                            <p className="text-[10px] text-gray-400">{t.id} • {t.time}</p>
+                            <p className="font-bold text-zinc-800">{t.customerName}</p>
+                            <p className="text-[10px] text-zinc-400">{t.id} • {t.time}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600">
+                      <td className="px-6 py-4 text-zinc-600">
                         {t.items.map((i: any) => `${i.qty}x ${i.name}`).join(', ')}
                       </td>
-                      <td className="px-6 py-4 font-bold text-gray-800">
+                      <td className="px-6 py-4 font-bold text-zinc-800">
                         Rp {t.total.toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{t.type}</span>
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t.type}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${
@@ -223,7 +226,7 @@ const DashboardView = ({ transactions }: any) => {
                 </AnimatePresence>
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-gray-400">No transactions yet. Go to POS to add an order.</td>
+                    <td colSpan={5} className="text-center py-8 text-zinc-400">No transactions yet. Go to POS to add an order.</td>
                   </tr>
                 )}
               </tbody>
@@ -231,8 +234,8 @@ const DashboardView = ({ transactions }: any) => {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-6">
-          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Revenue by Channel</h4>
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-100 flex flex-col gap-6">
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Revenue by Channel</h4>
           <div className="flex-1 flex flex-col justify-center gap-6">
             {[
               { label: 'Dine-in Customers', val: '65%', p: 'w-[65%]', color: 'bg-red-500' },
@@ -247,10 +250,10 @@ const DashboardView = ({ transactions }: any) => {
                 className="space-y-3 origin-left"
               >
                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-wide">
-                  <span className="text-gray-600">{e.label}</span>
-                  <span className="text-gray-800">{e.val}</span>
+                  <span className="text-zinc-600">{e.label}</span>
+                  <span className="text-zinc-800">{e.val}</span>
                 </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
                   <div className={`${e.color} h-full ${e.p} rounded-full relative overflow-hidden`}>
                     <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]"></div>
                   </div>
@@ -300,25 +303,25 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
   const total = subtotal + tax;
 
   return (
-    <div className="flex h-full overflow-hidden bg-gray-50/50">
+    <div className="flex h-full overflow-hidden bg-zinc-50/50">
       <div className="flex-grow flex flex-col overflow-hidden">
         <div className="p-8 pb-4 flex justify-between items-end shrink-0">
           <div>
             <span className="text-xs font-bold text-red-600 uppercase tracking-widest">Point of Sale</span>
-            <h2 className="text-3xl font-bold text-gray-800 mt-1">Spaghetti Menu</h2>
+            <h2 className="text-3xl font-bold text-zinc-800 mt-1">Spaghetti Menu</h2>
           </div>
           <div className="flex gap-4">
             <div className="relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input 
                 type="text" 
                 placeholder="Search menu..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm w-64 bg-white shadow-sm transition-all"
+                className="pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm w-64 bg-white shadow-sm transition-all"
               />
             </div>
-            <button className="p-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors shadow-sm text-gray-600">
+            <button className="p-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors shadow-sm text-zinc-600">
               <Filter className="w-5 h-5" />
             </button>
           </div>
@@ -334,7 +337,7 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   key={item.id}
                   whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
-                  className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all flex flex-col"
+                  className="bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm transition-all flex flex-col"
                 >
                   <div className="h-40 overflow-hidden relative">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
@@ -349,9 +352,9 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
                       </div>
                       <div className="flex items-center gap-1 mb-4">
                         {[...Array(5)].map((_, i) => (
-                           <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < item.spicy ? 'bg-red-500' : 'bg-gray-200'}`}></div>
+                           <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < item.spicy ? 'bg-red-500' : 'bg-zinc-200'}`}></div>
                         ))}
-                        <span className="text-[10px] text-gray-400 ml-2 uppercase font-bold">Spicy Lvl</span>
+                        <span className="text-[10px] text-zinc-400 ml-2 uppercase font-bold">Spicy Lvl</span>
                       </div>
                     </div>
                     <button 
@@ -369,12 +372,12 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
       </div>
 
       {/* Cart Sidebar */}
-      <aside className="w-[400px] bg-white border-l border-gray-200 flex flex-col h-full shadow-2xl relative z-10 shrink-0">
-        <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+      <aside className="w-[400px] bg-white border-l border-zinc-200 flex flex-col h-full shadow-2xl relative z-10 shrink-0">
+        <div className="p-6 border-b border-zinc-100 bg-zinc-50/50">
+          <h3 className="text-xl font-bold text-zinc-800 flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-red-500" /> Current Order
           </h3>
-          <p className="text-xs text-gray-500 mt-1">{cart.length} items in tray</p>
+          <p className="text-xs text-zinc-500 mt-1">{cart.length} items in tray</p>
         </div>
 
         <div className="flex-grow overflow-y-auto custom-scrollbar p-6 space-y-4">
@@ -385,21 +388,21 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 key={item.id} 
-                className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm"
+                className="flex items-center gap-4 bg-white p-3 rounded-xl border border-zinc-100 shadow-sm"
               >
                 <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-grow min-w-0">
-                  <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
+                  <p className="font-bold text-sm text-zinc-800 truncate">{item.name}</p>
                   <p className="text-red-600 font-bold text-xs">Rp {(item.price * item.quantity).toLocaleString()}</p>
                 </div>
-                <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1 border border-gray-200">
-                  <button onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-500 transition-all">
+                <div className="flex items-center gap-3 bg-zinc-50 rounded-lg p-1 border border-zinc-200">
+                  <button onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-white hover:shadow-sm text-zinc-500 transition-all">
                     {item.quantity === 1 ? <Trash2 className="w-3.5 h-3.5 text-red-500" /> : <MinusCircle className="w-4 h-4" />}
                   </button>
                   <span className="w-4 text-center font-bold text-sm">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-500 transition-all">
+                  <button onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-white hover:shadow-sm text-zinc-500 transition-all">
                     <PlusCircle className="w-4 h-4 text-red-500" />
                   </button>
                 </div>
@@ -407,25 +410,25 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
             ))}
           </AnimatePresence>
           {cart.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4 mt-20">
+            <div className="h-full flex flex-col items-center justify-center text-zinc-400 gap-4 mt-20">
               <Package className="w-16 h-16 opacity-20" />
               <p className="text-sm font-medium">Tray is empty</p>
             </div>
           )}
         </div>
 
-        <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
+        <div className="p-6 bg-white border-t border-zinc-100 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
           <div className="space-y-2 mb-6">
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="flex justify-between text-sm text-zinc-500">
               <span>Subtotal</span>
               <span className="font-medium">Rp {subtotal.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="flex justify-between text-sm text-zinc-500">
               <span>Tax (10%)</span>
               <span className="font-medium">Rp {tax.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between items-center pt-3 border-t border-dashed border-gray-200 mt-2">
-              <span className="text-sm font-bold text-gray-800 uppercase tracking-widest">Total</span>
+            <div className="flex justify-between items-center pt-3 border-t border-dashed border-zinc-200 mt-2">
+              <span className="text-sm font-bold text-zinc-800 uppercase tracking-widest">Total</span>
               <span className="text-2xl font-bold text-red-600">Rp {total.toLocaleString()}</span>
             </div>
           </div>
@@ -433,7 +436,7 @@ const POSView = ({ cart, setCart, onCheckout }: any) => {
             onClick={onCheckout}
             disabled={cart.length === 0}
             className={`w-full text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-all ${
-              cart.length > 0 ? 'bg-gradient-to-r from-red-600 to-red-500 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0' : 'bg-gray-300 cursor-not-allowed'
+              cart.length > 0 ? 'bg-gradient-to-r from-red-600 to-red-500 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0' : 'bg-zinc-300 cursor-not-allowed'
             }`}
           >
             <CreditCard className="w-5 h-5" /> Proceed to Checkout
@@ -472,14 +475,14 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
   };
 
   return (
-    <div className="p-8 grid grid-cols-1 xl:grid-cols-12 gap-8 h-full overflow-y-auto custom-scrollbar bg-gray-50/50">
+    <div className="p-8 grid grid-cols-1 xl:grid-cols-12 gap-8 h-full overflow-y-auto custom-scrollbar bg-zinc-50/50">
       <section className="xl:col-span-5 flex flex-col h-full min-h-[600px]">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full relative">
+        <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden flex flex-col h-full relative">
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-400 to-red-600"></div>
-          <div className="p-6 bg-gray-50/50 border-b border-gray-100 flex justify-between items-end mt-2">
+          <div className="p-6 bg-zinc-50/50 border-b border-zinc-100 flex justify-between items-end mt-2">
             <div>
-              <p className="text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Review Order</p>
-              <h3 className="text-2xl font-bold text-gray-800 tracking-tight">Summary</h3>
+              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1 tracking-widest">Review Order</p>
+              <h3 className="text-2xl font-bold text-zinc-800 tracking-tight">Summary</h3>
             </div>
           </div>
           <div className="flex-1 p-6 space-y-6 overflow-y-auto custom-scrollbar">
@@ -490,27 +493,27 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
                     <ChefHat className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-gray-800">{item.name}</p>
-                    <p className="text-[11px] text-gray-500">Qty: {item.quantity}</p>
+                    <p className="font-bold text-sm text-zinc-800">{item.name}</p>
+                    <p className="text-[11px] text-zinc-500">Qty: {item.quantity}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-sm text-gray-800">Rp {(item.price * item.quantity).toLocaleString()}</p>
+                  <p className="font-bold text-sm text-zinc-800">Rp {(item.price * item.quantity).toLocaleString()}</p>
                 </div>
               </div>
             ))}
-            <div className="border-t border-dashed border-gray-200 my-6"></div>
+            <div className="border-t border-dashed border-zinc-200 my-6"></div>
             <div className="space-y-3">
-              <div className="flex justify-between text-xs text-gray-600">
+              <div className="flex justify-between text-xs text-zinc-600">
                 <span>Subtotal</span>
                 <span className="font-bold">Rp {subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-xs text-gray-600">
+              <div className="flex justify-between text-xs text-zinc-600">
                 <span>Tax (10%)</span>
                 <span className="font-bold">Rp {tax.toLocaleString()}</span>
               </div>
               {orderType === 'Dine-in' && (
-                <div className="flex justify-between text-xs text-gray-600">
+                <div className="flex justify-between text-xs text-zinc-600">
                   <span>Service Charge (5%)</span>
                   <span className="font-bold">Rp {service.toLocaleString()}</span>
                 </div>
@@ -527,27 +530,27 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
       </section>
 
       <section className="xl:col-span-7 flex flex-col gap-8">
-        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
-          <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">Customer Information</h4>
+        <div className="bg-white rounded-2xl p-8 border border-zinc-200 shadow-sm">
+          <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-6">Customer Information</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-2 uppercase tracking-wide">Customer Name</label>
+              <label className="text-xs font-bold text-zinc-600 block mb-2 uppercase tracking-wide">Customer Name</label>
               <input 
                 type="text" 
                 value={customerName}
                 onChange={e => setCustomerName(e.target.value)}
                 placeholder="e.g. John Doe" 
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-2 uppercase tracking-wide">Order Type</label>
-              <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+              <label className="text-xs font-bold text-zinc-600 block mb-2 uppercase tracking-wide">Order Type</label>
+              <div className="flex gap-2 p-1 bg-zinc-100 rounded-xl">
                 {['Dine-in', 'Takeaway', 'Delivery'].map(type => (
                   <button 
                     key={type}
                     onClick={() => setOrderType(type)}
-                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${orderType === type ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${orderType === type ? 'bg-white text-red-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
                   >
                     {type}
                   </button>
@@ -557,8 +560,8 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm flex flex-col gap-6">
-          <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Payment Method</h4>
+        <div className="bg-white rounded-2xl p-8 border border-zinc-200 shadow-sm flex flex-col gap-6">
+          <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Payment Method</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: Store, label: 'CASH' },
@@ -570,7 +573,7 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
                 key={m.label} 
                 onClick={() => setPaymentMethod(m.label)}
                 className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all group ${
-                  paymentMethod === m.label ? 'border-red-500 bg-red-50 text-red-600' : 'border-gray-100 hover:border-red-200 text-gray-500'
+                  paymentMethod === m.label ? 'border-red-500 bg-red-50 text-red-600' : 'border-zinc-100 hover:border-red-200 text-zinc-500'
                 }`}
               >
                 <m.icon className={`w-8 h-8 mb-2 ${paymentMethod === m.label ? 'text-red-500' : 'opacity-50 group-hover:opacity-100'}`} />
@@ -597,21 +600,21 @@ const CheckoutView = ({ cart, setCart, onComplete }: any) => {
 };
 
 const HistoryView = ({ transactions }: any) => (
-  <div className="flex flex-col h-full overflow-hidden bg-gray-50/50">
+  <div className="flex flex-col h-full overflow-hidden bg-zinc-50/50">
     <section className="p-8 pb-0">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Transaction History</h2>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex gap-4 bg-gray-50/50">
+      <h2 className="text-3xl font-bold text-zinc-800 mb-6">Transaction History</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
+        <div className="p-6 border-b border-zinc-100 flex gap-4 bg-zinc-50/50">
           <div className="relative flex-1">
-             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-             <input type="text" placeholder="Search by ID or Customer..." className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-red-500 outline-none" />
+             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+             <input type="text" placeholder="Search by ID or Customer..." className="w-full pl-12 pr-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-red-500 outline-none" />
           </div>
-          <button className="px-6 py-3 border border-gray-200 bg-white rounded-xl text-sm font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
+          <button className="px-6 py-3 border border-zinc-200 bg-white rounded-xl text-sm font-bold text-zinc-600 flex items-center gap-2 hover:bg-zinc-50">
             <Filter className="w-4 h-4" /> Filter
           </button>
         </div>
         <table className="w-full text-left">
-          <thead className="bg-white border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          <thead className="bg-white border-b border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
             <tr>
               <th className="px-8 py-5">Order ID</th>
               <th className="px-8 py-5">Customer Info</th>
@@ -621,21 +624,21 @@ const HistoryView = ({ transactions }: any) => (
               <th className="px-8 py-5">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 text-sm">
+          <tbody className="divide-y divide-zinc-50 text-sm">
             {[...transactions].reverse().map((row: any) => (
-              <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={row.id} className="hover:bg-zinc-50 transition-colors">
                 <td className="px-8 py-5 font-bold text-red-600">{row.id}</td>
                 <td className="px-8 py-5">
-                  <p className="font-bold text-gray-800">{row.customerName}</p>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-tight">{row.type}</p>
+                  <p className="font-bold text-zinc-800">{row.customerName}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-tight">{row.type}</p>
                 </td>
-                <td className="px-8 py-5 text-gray-600">
+                <td className="px-8 py-5 text-zinc-600">
                   {row.items.map((i: any) => `${i.qty}x ${i.name}`).join(', ')}
                 </td>
-                <td className="px-8 py-5 text-gray-500 font-medium">
+                <td className="px-8 py-5 text-zinc-500 font-medium">
                   {row.time}
                 </td>
-                <td className="px-8 py-5 font-bold text-gray-800">
+                <td className="px-8 py-5 font-bold text-zinc-800">
                   Rp {row.total.toLocaleString()}
                 </td>
                 <td className="px-8 py-5">
@@ -666,11 +669,11 @@ const InventoryView = () => {
   ];
 
   return (
-    <div className="p-8 flex flex-col gap-8 overflow-y-auto h-full custom-scrollbar bg-gray-50/50">
+    <div className="p-8 flex flex-col gap-8 overflow-y-auto h-full custom-scrollbar bg-zinc-50/50">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold text-gray-800">Ingredient Inventory</h2>
-          <p className="text-sm text-gray-500 mt-1">Manage stock for your 4 spaghetti flavors</p>
+          <h2 className="text-3xl font-bold text-zinc-800">Ingredient Inventory</h2>
+          <p className="text-sm text-zinc-500 mt-1">Manage stock for your 4 spaghetti flavors</p>
         </div>
         <button className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center gap-2">
           <Plus className="w-4 h-4" /> Add Item
@@ -678,42 +681,42 @@ const InventoryView = () => {
       </div>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
             <Box className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Items</p>
-            <h3 className="text-2xl font-bold text-gray-800">{inventoryItems.length}</h3>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total Items</p>
+            <h3 className="text-2xl font-bold text-zinc-800">{inventoryItems.length}</h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center text-yellow-600">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Low Stock</p>
-            <h3 className="text-2xl font-bold text-gray-800">{inventoryItems.filter(i => i.status === 'Low').length}</h3>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Low Stock</p>
+            <h3 className="text-2xl font-bold text-zinc-800">{inventoryItems.filter(i => i.status === 'Low').length}</h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600">
             <AlertCircle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Critical</p>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Critical</p>
             <h3 className="text-2xl font-bold text-red-600">{inventoryItems.filter(i => i.status === 'Critical').length}</h3>
           </div>
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-          <h4 className="text-sm font-bold text-gray-700">Stock Levels</h4>
+      <section className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
+        <div className="p-6 border-b border-zinc-100 bg-zinc-50/50">
+          <h4 className="text-sm font-bold text-zinc-700">Stock Levels</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            <thead className="bg-white border-b border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
               <tr>
                 <th className="px-6 py-4">Item Name</th>
                 <th className="px-6 py-4">Current Stock</th>
@@ -722,14 +725,14 @@ const InventoryView = () => {
                 <th className="px-6 py-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50 text-sm">
+            <tbody className="divide-y divide-zinc-50 text-sm">
               {inventoryItems.map(item => {
                 const percentage = Math.min((item.stock / (item.limit * 5)) * 100, 100);
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-gray-800">{item.name}</td>
+                  <tr key={item.id} className="hover:bg-zinc-50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-zinc-800">{item.name}</td>
                     <td className="px-6 py-4">
-                      <span className="font-bold">{item.stock}</span> <span className="text-gray-500 text-xs">{item.unit}</span>
+                      <span className="font-bold">{item.stock}</span> <span className="text-zinc-500 text-xs">{item.unit}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${
@@ -741,7 +744,7 @@ const InventoryView = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                      <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
                         <div 
                           className={`h-full rounded-full ${item.status === 'Good' ? 'bg-green-500' : item.status === 'Low' ? 'bg-yellow-500' : 'bg-red-500'}`}
                           style={{ width: `${percentage}%` }}
@@ -792,15 +795,15 @@ export default function App() {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50 text-gray-900 overflow-hidden font-sans">
+    <div className="flex h-screen bg-zinc-50 text-zinc-900 overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="w-24 md:w-64 bg-white border-r border-gray-200 flex flex-col h-full py-8 gap-2 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50">
+      <aside className="w-24 md:w-64 bg-zinc-950 border-r border-zinc-900 flex flex-col h-full py-8 gap-2 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-50">
         <div className="px-6 mb-10 flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-500/30 shrink-0">
             <ChefHat className="w-6 h-6" />
           </div>
           <div className="hidden md:block overflow-hidden">
-            <h1 className="text-xl font-black text-gray-800 tracking-tight">Lezzatri</h1>
+            <h1 className="text-xl font-black text-white tracking-tight">Lezzatri</h1>
             <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mt-0.5">Admin Suite</p>
           </div>
         </div>
@@ -817,16 +820,16 @@ export default function App() {
           ))}
         </nav>
 
-        <div className="px-6 pt-6 mt-auto border-t border-gray-100">
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-200">
-              <UserCircle className="w-6 h-6 text-gray-400" />
+        <div className="px-6 pt-6 mt-auto border-t border-zinc-900">
+          <div className="flex items-center gap-3 p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800 transition-colors hover:bg-zinc-900">
+            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-700">
+              <UserCircle className="w-6 h-6 text-zinc-400" />
             </div>
             <div className="hidden md:block overflow-hidden">
-              <p className="text-xs font-bold text-gray-800 truncate">Super Admin</p>
-              <p className="text-[9px] text-green-500 font-bold uppercase tracking-widest">Online</p>
+              <p className="text-xs font-bold text-zinc-200 truncate">Super Admin</p>
+              <p className="text-[9px] text-green-400 font-bold uppercase tracking-widest">Online</p>
             </div>
-            <LogOut className="hidden md:block w-4 h-4 text-gray-400 ml-auto cursor-pointer hover:text-red-500 transition-colors" />
+            <LogOut className="hidden md:block w-4 h-4 text-zinc-500 ml-auto cursor-pointer hover:text-red-400 transition-colors" />
           </div>
         </div>
       </aside>
@@ -838,7 +841,7 @@ export default function App() {
           subtitle={views[currentView]?.subtitle}
         />
         
-        <div className="flex-1 relative overflow-hidden bg-gray-50">
+        <div className="flex-1 relative overflow-hidden bg-zinc-50">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
@@ -849,7 +852,7 @@ export default function App() {
               className="absolute inset-0 h-full"
             >
               {views[currentView]?.component || (
-                <div className="p-8 flex flex-col items-center justify-center h-full text-gray-400">
+                <div className="p-8 flex flex-col items-center justify-center h-full text-zinc-400">
                    <Settings className="w-16 h-16 animate-spin-slow opacity-20 mb-4" />
                    <h2 className="text-xl font-bold">Module in Development</h2>
                    <p className="text-sm">This feature is not yet available.</p>
